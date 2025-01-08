@@ -4,3 +4,4 @@ Include/
 Lib/
 Scripts/
 venv/
+__pycache__/
