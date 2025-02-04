@@ -82,7 +82,11 @@ def preprocess_mapping(mapping):
 # Definition of string matching function to get the model type and compressor type
 def string_match(description, company, company_dict):
     '''
-    This function scans the detailed description column of the trade data for model descriptions corresponding to the company. Must be applied row-wise
+    This function scans the detailed description column of the trade data for model descriptions corresponding to the company. Must be applied row-wise.
+    Starts with trying to match the longest model name from company_dict first to the description , ending with trying to match the shortest model name.
+    
+    Models are only identified in the description if there are no other letters or digits before the potential substring match.
+    So the model "LT" won't be found in the description "VLTQ-1000", but in "LT 1000" or "LT1000" or "LTQ1000".
     
     Args:
         description (Iterable): Detailed Description column
@@ -94,7 +98,6 @@ def string_match(description, company, company_dict):
                and "" (empty String) for comp_type and "Unknown Family" for comp_family in both cases
     '''
    
-    
     if company == "Other":
         return "Unknown_Company", "", "Unknown_Family"
     
@@ -102,7 +105,6 @@ def string_match(description, company, company_dict):
     comp_type = ""
     comp_family = "Unknown_Family"
     
-
     # Retrieve the preprocessed company-specific mapping
     model_sel = company_dict.get(company, None)
     if model_sel is None:
@@ -110,37 +112,36 @@ def string_match(description, company, company_dict):
         return "Unknown_Company", "", "Unknown_Family"
     
     models_sorted = model_sel.sort_values(by="Model Family", key=lambda col: col.str.len(), ascending=False)
-    
-    short_models = []
 
     for _, row in models_sorted.iterrows():
-        
         if row["Model Details"] != '':
-        
-            # Check if both Model Family and Model Details are in chunk
-            if row['Model Family'] in description and row['Model Details'] in description:
-                # Get the positions of Model Family and Model Details
-                family_index = description.find(row['Model Family'])
-                details_index = description.find(row['Model Details'])
-                
+            # Create regex patterns to check for whole word matches
+            family_pattern = fr"(?<![a-zA-Z0-9]){re.escape(row['Model Family'])}"
+            details_pattern = fr"(?<![a-zA-Z0-9]){re.escape(row['Model Details'])}"
+
+
+            # Check if both Model Family and Model Details are in the description
+            if re.search(family_pattern, description) and re.search(details_pattern, description):
                 # Ensure Model Details appears after Model Family
-                if family_index < details_index:
+                family_match = re.search(family_pattern, description)
+                details_match = re.search(details_pattern, description)
+
+                if family_match.start() < details_match.start():
                     model = f"{row['Model Family']}...{row['Model Details']}"
                     comp_type = row['Compressor Type']
                     comp_family = row['Compressor Family']
-                    return model, comp_type, comp_family # Early return to avoid further processing
-                else:
-                    continue
-                
+                    return model, comp_type, comp_family  # Early return to avoid further processing
+
         else:
-            if row['Model Family'] in description:
+            # Create regex pattern to check for whole word match
+            family_pattern = fr"(?<![a-zA-Z0-9]){re.escape(row['Model Family'])}"
+
+            if re.search(family_pattern, description):
                 model = row["Model Family"]
                 comp_type = row['Compressor Type']
                 comp_family = row['Compressor Family']
-                return model, comp_type, comp_family # Early return to avoid further processing
-            else:
-                continue
-    
+                return model, comp_type, comp_family  # Early return to avoid further processing
+
     return "Unknown_Model", "", "Unknown_Family"
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
