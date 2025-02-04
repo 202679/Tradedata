@@ -140,5 +140,6 @@ class DataTransformer:
         # Handle outliers for KGS
         raw_data = KGS_Outlier_Handling(raw_data, self.usd_eur)
 
+        print("Rows of new data after transformation: ", len(raw_data.index))
         print("Data Transformation complete!")
         return raw_data

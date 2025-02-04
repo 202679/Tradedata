@@ -40,10 +40,8 @@ class DataExporter:
         max_year = str(new_data['Year'].max())
 
         # Combine old and new data
-        print("Combining new and old data, cleaning up and converting data types")
         combined_data = pd.concat([old_data, new_data])
 
-        
         # Drop duplicates
         combined_data.drop_duplicates(inplace=True)
 
@@ -54,7 +52,6 @@ class DataExporter:
             combined_data[float_columns] = combined_data[float_columns].astype(int)
 
         # Prepare Excel output with selected columns
-        print("Preparing Excel and CSV outputs")
         excel_output = combined_data[[
             "Year", "Month", "Competitor", "comp_types", "comp_family", "models", 
             "Indian_Importer", "Detailed_Description", "Total_Euro_Amount", 
@@ -64,11 +61,11 @@ class DataExporter:
         # Export to Excel
         excel_file_path = os.path.join(str(self.output_dir), f"Import Data India_Compressors_{max_month}_{max_year}.xlsx")
         excel_output.to_excel(excel_file_path, index=False)
-        print(f"Excel file exported to: {excel_file_path}")
+        print(f"Excel file for sending exported to: {excel_file_path}")
 
         # Export to CSV
         csv_file_path = os.path.join(str(self.output_dir), "data.csv")
         combined_data.to_csv(csv_file_path, index=False)
-        print(f"CSV file exported to: {csv_file_path}")
+        print(f"CSV file for PowerBI exported to: {csv_file_path}")
 
         print("Data Extraction complete!")

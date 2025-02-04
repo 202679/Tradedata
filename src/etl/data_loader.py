@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 import math
+from tqdm import tqdm
 
 class DataLoader:
     def __init__(self, config):
@@ -83,13 +84,16 @@ class DataLoader:
         ]
 
         #Read each excel file into a pandas dataframe and concatenate them into a single dataframe
-        dfs = [
-            pd.read_excel(file, header=7, dtype={
-                "数量": np.int64, '美元总金额': np.int64, '美元单价': np.int64,
-                '卢比总金额': np.int64, '卢比单价': np.int64
-            }, usecols=self.use_cols)
-            for file in filenames
-        ]
+        dfs = []
+        with tqdm(total=len(filenames), desc="Loading Excel files", unit="file", dynamic_ncols=True) as pbar:
+            for file in filenames:
+                df = pd.read_excel(file, header=7, dtype={
+                    "数量": np.int64, '美元总金额': np.int64, '美元单价': np.int64,
+                    '卢比总金额': np.int64, '卢比单价': np.int64
+                }, usecols=self.use_cols)
+                dfs.append(df)
+                pbar.update(1)
+    
         raw_data = pd.concat(dfs)
 
         #Translate column descriptions
@@ -130,4 +134,5 @@ class DataLoader:
             new_data = raw_data[raw_data['Date'] > raw_data['Date'].max() - pd.DateOffset(months=self.month_offset_testrun)]
             old_data = old_data[old_data['Date'] < old_data['Date'].max() - pd.DateOffset(months=self.month_offset_testrun)]
 
+        print("Rows of new data loaded: ", len(new_data.index))
         return new_data, models, old_data

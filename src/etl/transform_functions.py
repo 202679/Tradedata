@@ -85,8 +85,8 @@ def string_match(description, company, company_dict):
     This function scans the detailed description column of the trade data for model descriptions corresponding to the company. Must be applied row-wise.
     Starts with trying to match the longest model name from company_dict first to the description , ending with trying to match the shortest model name.
     
-    Models are only identified in the description if there are no other letters before and after the potential substring match.
-    So the model LT won't be found in the description "VLTQ-1000", but in "LT 1000" or "LT1000".
+    Models are only identified in the description if there are no other letters or digits before the potential substring match.
+    So the model "LT" won't be found in the description "VLTQ-1000", but in "LT 1000" or "LT1000" or "LTQ1000".
     
     Args:
         description (Iterable): Detailed Description column
@@ -116,8 +116,9 @@ def string_match(description, company, company_dict):
     for _, row in models_sorted.iterrows():
         if row["Model Details"] != '':
             # Create regex patterns to check for whole word matches
-            family_pattern = fr"(?!\\w){re.escape(row['Model Family'])}(?!\\w)"
-            details_pattern = fr"(?!\\w){re.escape(row['Model Details'])}(?!\\w)"
+            family_pattern = fr"(?<![a-zA-Z0-9]){re.escape(row['Model Family'])}"
+            details_pattern = fr"(?<![a-zA-Z0-9]){re.escape(row['Model Details'])}"
+
 
             # Check if both Model Family and Model Details are in the description
             if re.search(family_pattern, description) and re.search(details_pattern, description):
@@ -133,7 +134,7 @@ def string_match(description, company, company_dict):
 
         else:
             # Create regex pattern to check for whole word match
-            family_pattern = fr"(?!\\w){re.escape(row['Model Family'])}(?!\\w)"
+            family_pattern = fr"(?<![a-zA-Z0-9]){re.escape(row['Model Family'])}"
 
             if re.search(family_pattern, description):
                 model = row["Model Family"]
