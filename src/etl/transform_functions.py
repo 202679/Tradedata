@@ -50,19 +50,30 @@ def KGS_Outlier_Handling(data, USD_EUR):
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 def USD_EUR_Conversion(data, USD_EUR):
+        
+    data_start, data_end = data['Date'].min(), data['Date'].max()
+    usd_eur_start, usd_eur_end = USD_EUR['DATE'].min(), USD_EUR['DATE'].max()
 
-        merged_data = data.merge(USD_EUR, left_on='Date', right_on='DATE', how='left')
+    # Throw exception if date ranges don't match
+    if data_start < usd_eur_start or data_end > usd_eur_end:
+        raise ValueError(
+            f"Date ranges between trade data and conversion rates do not match!\n"
+            f"Trade data range: {data_start} to {data_end}\n"
+            f"Conversion rate data range: {usd_eur_start} to {usd_eur_end}"
+        )
 
-        # Currency conversion
-        merged_data['Total_Euro_Amount'] = merged_data['Total_Dollar_Amount'] / merged_data['Euro/US dollar (EXR.D.USD.EUR.SP00.A)']
-        merged_data['Total_Euro_Amount'] = merged_data['Total_Euro_Amount'].astype(int)
-        merged_data['Euros_Unit_Price'] = merged_data['USD_Unit_Price'] / merged_data['Euro/US dollar (EXR.D.USD.EUR.SP00.A)']
-        merged_data['Euros_Unit_Price'] = merged_data['Euros_Unit_Price'].astype(int)
+    merged_data = data.merge(USD_EUR, left_on='Date', right_on='DATE', how='left')
 
-        # Drop the extra 'DATE' column from the merge if desired
-        merged_data.drop(columns=['DATE', 'Euro/US dollar (EXR.D.USD.EUR.SP00.A)'], inplace=True)
+    # Currency conversion
+    merged_data['Total_Euro_Amount'] = merged_data['Total_Dollar_Amount'] / merged_data['Euro/US dollar (EXR.D.USD.EUR.SP00.A)']
+    merged_data['Total_Euro_Amount'] = merged_data['Total_Euro_Amount'].astype(int)
+    merged_data['Euros_Unit_Price'] = merged_data['USD_Unit_Price'] / merged_data['Euro/US dollar (EXR.D.USD.EUR.SP00.A)']
+    merged_data['Euros_Unit_Price'] = merged_data['Euros_Unit_Price'].astype(int)
 
-        return merged_data
+    # Drop the extra 'DATE' column from the merge if desired
+    merged_data.drop(columns=['DATE', 'Euro/US dollar (EXR.D.USD.EUR.SP00.A)'], inplace=True)
+
+    return merged_data
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 

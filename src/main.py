@@ -28,8 +28,8 @@ if __name__ == "__main__":
             "old_data_path": "C:/Tradedata_output/data.csv",
             "supplier_file": "K:/DESDN/mbd/pm/mpm_pma/00_Projekte/CSMO/Market Assessment/Market APAC/India/Handelsdatenprojekt/Daten/Supplier Names India.xlsx",
             "model_file": "K:/DESDN/mbd/pm/mpm_pma/00_Projekte/CSMO/Market Assessment/Market APAC/India/Handelsdatenprojekt/Daten/Model Mapping.xlsx",
-            "data_dirs": ["2021", "2022", "2023", "2024"],
-            "month_offset_testrun": 48, #This value determines how many months back the testrun should be done when no new data is available
+            "data_dirs": ["2021", "2022", "2023", "2024", "2025"],
+            "month_offset_testrun": 1, #This value determines how many months back the testrun should be done when no new data is available
             "export_path": "C:/Tradedata_Output/",
             "usd_eur_file": "K:/DESDN/mbd/pm/mpm_pma/00_Projekte/CSMO/Market Assessment/Market APAC/India/Handelsdatenprojekt/Daten/USD_EUR.csv"
     }
